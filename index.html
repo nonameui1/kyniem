@@ -1,1030 +1,793 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nơi Lưu Giữ Kỷ Niệm 9/5 (2025-2026)</title>
-<style>
-/* --- CẤU HÌNH HỆ THỐNG MÀU SẮC & GIAO DIỆN --- */
-:root {
---primary-color: #eb25d0;
---secondary-color: #a29bfe;
---accent-color: #b700ff;
---bg-color: #f8f9fa;
---card-bg: #ffffff;
---text-color: #000000;
-}
-* {
-box-sizing: border-box;
-margin: 0;
-padding: 0;
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-body {
-background-color: var(--bg-color);
-color: var(--text-color);
-line-height: 1.6;
-}
-.hidden {
-display: none !important;
-}
-/* --- PHẦN 1: MÀN HÌNH XÁC THỰC THÀNH VIÊN --- */
-#auth-screen {
-display: flex;
-justify-content: center;
-align-items: center;
-min-height: 100vh;
-background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-padding: 20px;
-}
-.auth-card {
-background: var(--card-bg);
-padding: 40px;
-border-radius: 16px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-text-align: center;
-max-width: 500px;
-width: 100%;
-}
-.auth-card h2 { color: var(--primary-color); margin-bottom: 20px; }
-.auth-card p { color: #636e72; margin-bottom: 20px; }
-.quiz-options { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-.option-btn {
-background: #f1f2f6; color: var(--text-color); border: 2px solid #e4e7eb;
-padding: 14px 20px; font-size: 16px; border-radius: 8px; cursor: pointer;
-transition: all 0.3s ease; text-align: left; font-weight: 500;
-}
-.option-btn:hover {
-background: var(--secondary-color); color: white;
-border-color: var(--primary-color); transform: translateX(5px);
-}
-/* --- CHỨC NĂNG PHÁT NHẠC --- */
-.music-player-widget {
-position: fixed; bottom: 20px; left: 20px;
-background: rgba(66, 31, 2, 0.85); backdrop-filter: blur(10px);
-padding: 12px 20px; border-radius: 50px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-display: flex; align-items: center; gap: 15px; z-index: 999;
-border: 1px solid rgb(0, 0, 0);
-max-width: 450px;
-}
-.cd-disk {
-width: 50px; height: 50px; border-radius: 50%;
-background: radial-gradient(circle, #fff 6px, #2c3e50 7px, #2c3e50 15px, #1a252f 16px);
-border: 2px solid #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.2); flex-shrink: 0;
-animation: spinCD 6s linear infinite; animation-play-state: paused;
-}
-.cd-disk.playing { animation-play-state: running; }
-@keyframes spinCD {
-from { transform: rotate(0deg); }
-to { transform: rotate(360deg); }
-}
-.player-controls {
-display: flex; flex-direction: column; overflow: hidden;
-width: 250px;
-}
-.song-title { font-size: 0.9rem; font-weight: 600; color: rgb(255, 255, 255); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
-.play-toggle-btn {
-background: var(--primary-color); color: white; border: none; border-radius: 20px;
-padding: 4px 12px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: 0.2s; width: fit-content;
-}
-.play-toggle-btn:hover { background: #5b4cc4; }
-
-/* --- CSS HIỆU ỨNG RƠI (MỚI THÊM) --- */
-#effect-container {
-position: fixed;
-top: 0; left: 0; width: 100vw; height: 100vh;
-pointer-events: none; /* Rất quan trọng: cho phép click xuyên qua hiệu ứng */
-z-index: 9998; /* Nằm dưới hộp thoại Modal nhưng trên mọi thứ khác */
-overflow: hidden;
-}
-.falling-item {
-position: absolute;
-top: -50px;
-animation: fallDown linear forwards;
-opacity: 0.9;
-}
-@keyframes fallDown {
-0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
-100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-}
-
-/* --- PHẦN 2: NỘI DUNG CHÍNH CỦA TRANG WEB --- */
-header {
-/* Thay 'anh-lop.jpg' bằng đúng tên file ảnh của bạn nhé */
-background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('al1.jpg');
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-color: white;
-text-align: center;
-padding: 80px 20px;
-box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-cursor: pointer; /* Hiển thị con trỏ tay để báo có thể click */
-transition: opacity 0.3s ease;
-}
-header:hover {
-opacity: 0.9;
-}
-header h1 { font-size: 2.5rem; margin-bottom: 10px; }
-
-nav {
-display: flex; justify-content: center; background: var(--card-bg);
-position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap;
-}
-nav a { padding: 15px 25px; color: var(--text-color); text-decoration: none; font-weight: 600; transition: 0.3s; }
-nav a:hover { color: var(--primary-color); background-color: #f1f2f6; }
-.container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-section { margin-bottom: 60px; scroll-margin-top: 70px; }
-section h2 { font-size: 2rem; margin-bottom: 30px; position: relative; padding-bottom: 10px; color: var(--primary-color); }
-section h2::after { content: ''; position: absolute; left: 0; bottom: 0; width: 60px; height: 4px; background-color: var(--accent-color); border-radius: 2px; }
-
-/* --- GRID ẢNH KỶ YẾU --- */
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-.photo-item {
-background: var(--card-bg); border-radius: 12px; overflow: hidden;
-box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s;
-cursor: pointer;
-}
-.photo-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(120, 2, 255, 0.568); }
-.photo-item img { width: 100%; height: 200px; object-fit: cover; display: block; }
-
-/* --- GRID VIDEO KỶ YẾU --- */
-.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
-.video-item { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.video-item video { width: 100%; display: block; }
-.video-info { padding: 15px; font-weight: 500; }
-
-/* --- GRID THÀNH VIÊN LỚP --- */
-.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
-.member-card {
-background: var(--card-bg); border-radius: 12px; padding: 20px;
-text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee;
-cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
-}
-.member-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 25px #a29bfe; border-color: var(--secondary-color); }
-.member-card img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #eee; }
-.member-card .name { font-weight: 600; font-size: 1.1rem; margin-bottom: 5px; }
-.member-card .role { font-size: 0.9rem; color: #7f8c8d; }
-.teacher-highlight {
-grid-column: 1 / -1; background: linear-gradient(to right, #fff9e6, #ffffff);
-border: 2px solid #f1c40f; display: flex; align-items: center; justify-content: center;
-gap: 30px; padding: 30px; text-align: left;
-}
-.teacher-highlight:hover { border-color: #d35400; }
-.teacher-highlight img { width: 150px; height: 150px; border: 4px solid #f1c40f; }
-.teacher-highlight .teacher-info h3 { font-size: 1.5rem; color: #d35400; margin-bottom: 5px; }
-.teacher-highlight .teacher-info p { color: #7f8c8d; font-style: italic; }
-
-/* --- PHẦN 3: GÓC NHẮN GỬI & THẢ TIM (CẬP NHẬT MỚI) --- */
-.letter-section {
-background: var(--card-bg); padding: 40px; border-radius: 16px;
-box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-top: 5px solid var(--accent-color);
-}
-.write-letter-box {
-display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;
-background: #fdfbfb; padding: 20px; border-radius: 12px; border: 1px dashed #dcdde1;
-}
-.write-letter-box input, .write-letter-box textarea {
-width: 100%; padding: 12px 15px; border: 1px solid #dcdde1;
-border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s;
-}
-.write-letter-box input:focus, .write-letter-box textarea:focus {
-border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
-}
-.submit-btn {
-background: var(--accent-color); color: white; border: none;
-padding: 12px 25px; font-size: 1rem; font-weight: bold; border-radius: 8px;
-cursor: pointer; transition: 0.3s; align-self: flex-end;
-}
-.submit-btn:hover { background: #e84393; transform: translateY(-2px); }
-#message-board { display: flex; flex-direction: column; gap: 20px; }
-.letter-card {
-background: #ffffff; padding: 25px; border-radius: 12px;
-border-left: 4px solid var(--secondary-color);
-box-shadow: 0 3px 10px rgba(0,0,0,0.03); position: relative;
-}
-.letter-header {
-display: flex; justify-content: space-between; align-items: flex-start;
-margin-bottom: 10px;
-}
-.letter-card h4 { color: var(--primary-color); font-size: 1.2rem; margin: 0;}
-
-/* CSS NÚT SỬA VÀ XOÁ THƯ */
-.action-buttons {
-display: flex;
-gap: 8px;
-}
-.edit-btn {
-background: #74b9ff; color: white; border: none; padding: 5px 12px;
-border-radius: 6px; cursor: pointer; font-size: 0.85rem;
-transition: all 0.3s;
-}
-.edit-btn:hover { background: #0984e3; transform: scale(1.05); }
-.delete-btn {
-background: #ff7675; color: white; border: none; padding: 5px 12px;
-border-radius: 6px; cursor: pointer; font-size: 0.85rem;
-transition: all 0.3s;
-}
-.delete-btn:hover { background: #d63031; transform: scale(1.05); }
-.letter-content { font-size: 1.05rem; color: #34495e; white-space: pre-line; line-height: 1.7; font-style: italic; margin-bottom: 25px; }
-.heart-btn {
-position: absolute; bottom: 15px; right: 20px;
-background: #f1f2f6; border: none; padding: 6px 15px;
-border-radius: 20px; cursor: pointer; font-size: 0.95rem;
-display: flex; align-items: center; gap: 5px; color: #636e72;
-transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.heart-btn:hover { background: #ffeaa7; }
-.heart-btn.liked { background: #ff7675; color: white; }
-.heart-btn.liked .heart-icon { animation: heartBeat 0.5s; }
-@keyframes heartBeat {
-0% { transform: scale(1); }
-50% { transform: scale(1.4); }
-100% { transform: scale(1); }
-}
-footer { text-align: center; padding: 30px; color: #95a5a6; font-size: 0.9rem; background-color: #fff; margin-top: 80px; }
-
-/* --- CSS HỘP THOẠI MODAL ĐA NĂNG --- */
-#member-modal {
-position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
-display: flex; justify-content: center; align-items: center;
-z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
-}
-#member-modal.active { opacity: 1; visibility: visible; }
-.modal-content {
-background: var(--card-bg); padding: 40px; border-radius: 20px;
-text-align: center; max-width: 400px; width: 90%; position: relative;
-transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-#member-modal.active .modal-content { transform: scale(1); }
-.modal-content img {
-width: 180px; height: 180px; border-radius: 50%; object-fit: cover;
-border: 5px solid rgb(0, 0, 0); margin-bottom: 20px;
-transition: all 0.3s ease;
-}
-.modal-content h3 { color: rgb(66, 66, 65); font-size: 1.8rem; margin-bottom: 10px; }
-.modal-content p { color: #636e72; font-size: 1.1rem; }
-.close-modal-btn {
-position: absolute; top: 15px; right: 15px; background: #f1f2f6; border: none;
-width: 35px; height: 35px; border-radius: 50%; font-size: 20px; cursor: pointer;
-display: flex; justify-content: center; align-items: center; z-index: 10;
-}
-.close-modal-btn:hover { background: var(--accent-color); color: white; }
-
-#member-modal.photo-mode .modal-content {
-max-width: 800px; width: 95%; padding: 15px; background: transparent; box-shadow: none;
-}
-#member-modal.photo-mode .modal-content img {
-width: 100%; height: auto; max-height: 80vh;
-border-radius: 8px; border: none; margin-bottom: 0; object-fit: contain;
-}
-#member-modal.photo-mode .modal-content h3,
-#member-modal.photo-mode .modal-content p { display: none; }
-#member-modal.photo-mode .close-modal-btn { top: -20px; right: 0; background: rgba(255,255,255,0.3); color: white; }
-
-@media (max-width: 768px) {
-.teacher-highlight { flex-direction: column; text-align: center; padding: 20px; }
-nav a { padding: 12px 15px; font-size: 0.9rem; }
-.music-player-widget { left: 50%; transform: translateX(-50%); width: calc(100% - 40px); bottom: 15px; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nơi Lưu Giữ Kỷ Niệm 9/5 (2025-2026)</title>
+    <style>
+        /* --- CẤU HÌNH HỆ THỐNG MÀU SẮC & GIAO DIỆN --- */
+        :root {
+            --primary-color: #eb25d0;
+            --secondary-color: #a29bfe;
+            --accent-color: #b700ff;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #000000;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* --- PHẦN 1: MÀN HÌNH XÁC THỰC THÀNH VIÊN --- */
+        #auth-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            padding: 20px;
+        }
+        .auth-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .auth-card h2 { color: var(--primary-color); margin-bottom: 20px; }
+        .auth-card p { color: #636e72; margin-bottom: 20px; }
+        .quiz-options { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .option-btn {
+            background: #f1f2f6; color: var(--text-color); border: 2px solid #e4e7eb;
+            padding: 14px 20px; font-size: 16px; border-radius: 8px; cursor: pointer;
+            transition: all 0.3s ease; text-align: left; font-weight: 500;
+        }
+        .option-btn:hover {
+            background: var(--secondary-color); color: white;
+            border-color: var(--primary-color); transform: translateX(5px);
+        }
+        /* --- CHỨC NĂNG PHÁT NHẠC --- */
+        .music-player-widget {
+            position: fixed; bottom: 20px; left: 20px;
+            background: rgba(66, 31, 2, 0.85); backdrop-filter: blur(10px);
+            padding: 12px 20px; border-radius: 50px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            display: flex; align-items: center; gap: 15px; z-index: 999;
+            border: 1px solid rgb(0, 0, 0);
+            max-width: 450px;
+        }
+        .cd-disk {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: radial-gradient(circle, #fff 6px, #2c3e50 7px, #2c3e50 15px, #1a252f 16px);
+            border: 2px solid #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.2); flex-shrink: 0;
+            animation: spinCD 6s linear infinite; animation-play-state: paused;
+        }
+        .cd-disk.playing { animation-play-state: running; }
+        @keyframes spinCD {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .player-controls {
+            display: flex; flex-direction: column; overflow: hidden;
+            width: 250px;
+        }
+        .song-title { font-size: 0.9rem; font-weight: 600; color: rgb(255, 255, 255); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
+        .play-toggle-btn {
+            background: var(--primary-color); color: white; border: none; border-radius: 20px;
+            padding: 4px 12px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: 0.2s; width: fit-content;
+        }
+        .play-toggle-btn:hover { background: #5b4cc4; }
+        /* --- CSS HIỆU ỨNG RƠI --- */
+        #effect-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            overflow: hidden;
+        }
+        .falling-item {
+            position: absolute;
+            top: -50px;
+            animation: fallDown linear forwards;
+            opacity: 0.9;
+        }
+        @keyframes fallDown {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        /* --- PHẦN 2: NỘI DUNG CHÍNH CỦA TRANG WEB --- */
+        header {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('al1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        header:hover {
+            opacity: 0.9;
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        nav {
+            display: flex; justify-content: center; background: var(--card-bg);
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap;
+        }
+        nav a { padding: 15px 25px; color: var(--text-color); text-decoration: none; font-weight: 600; transition: 0.3s; }
+        nav a:hover { color: var(--primary-color); background-color: #f1f2f6; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        section { margin-bottom: 60px; scroll-margin-top: 70px; }
+        section h2 { font-size: 2rem; margin-bottom: 30px; position: relative; padding-bottom: 10px; color: var(--primary-color); }
+        section h2::after { content: ''; position: absolute; left: 0; bottom: 0; width: 60px; height: 4px; background-color: var(--accent-color); border-radius: 2px; }
+        /* --- GRID ẢNH KỶ YẾU --- */
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .photo-item {
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .photo-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(120, 2, 255, 0.568); }
+        .photo-item img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        /* --- GRID VIDEO KỶ YẾU --- */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .video-item { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .video-item video { width: 100%; display: block; }
+        .video-info { padding: 15px; font-weight: 500; }
+        /* --- GRID THÀNH VIÊN LỚP --- */
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+        .member-card {
+            background: var(--card-bg); border-radius: 12px; padding: 20px;
+            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee;
+            cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .member-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 25px #a29bfe; border-color: var(--secondary-color); }
+        .member-card img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #eee; }
+        .member-card .name { font-weight: 600; font-size: 1.1rem; margin-bottom: 5px; }
+        .member-card .role { font-size: 0.9rem; color: #7f8c8d; }
+        .teacher-highlight {
+            grid-column: 1 / -1; background: linear-gradient(to right, #fff9e6, #ffffff);
+            border: 2px solid #f1c40f; display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 30px; text-align: left;
+        }
+        .teacher-highlight:hover { border-color: #d35400; }
+        .teacher-highlight img { width: 150px; height: 150px; border: 4px solid #f1c40f; }
+        .teacher-highlight .teacher-info h3 { font-size: 1.5rem; color: #d35400; margin-bottom: 5px; }
+        .teacher-highlight .teacher-info p { color: #7f8c8d; font-style: italic; }
+        /* --- PHẦN 3: GÓC NHẮN GỬI & THẢ TIM --- */
+        .letter-section {
+            background: var(--card-bg); padding: 40px; border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-top: 5px solid var(--accent-color);
+        }
+        .write-letter-box {
+            display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;
+            background: #fdfbfb; padding: 20px; border-radius: 12px; border: 1px dashed #dcdde1;
+        }
+        .write-letter-box input, .write-letter-box textarea {
+            width: 100%; padding: 12px 15px; border: 1px solid #dcdde1;
+            border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        .write-letter-box input:focus, .write-letter-box textarea:focus {
+            border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+        .submit-btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 12px 25px; font-size: 1rem; font-weight: bold; border-radius: 8px;
+            cursor: pointer; transition: 0.3s; align-self: flex-end;
+        }
+        .submit-btn:hover { background: #e84393; transform: translateY(-2px); }
+        #message-board { display: flex; flex-direction: column; gap: 20px; }
+        .letter-card {
+            background: #ffffff; padding: 25px; border-radius: 12px;
+            border-left: 4px solid var(--secondary-color);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.03); position: relative;
+        }
+        .letter-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .letter-card h4 { color: var(--primary-color); font-size: 1.2rem; margin: 0;}
+        /* CSS NÚT SỬA VÀ XOÁ THƯ */
+        .action-buttons {
+            display: flex; gap: 8px;
+        }
+        .edit-btn {
+            background: #74b9ff; color: white; border: none; padding: 5px 12px;
+            border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .edit-btn:hover { background: #0984e3; transform: scale(1.05); }
+        .delete-btn {
+            background: #ff7675; color: white; border: none; padding: 5px 12px;
+            border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .delete-btn:hover { background: #d63031; transform: scale(1.05); }
+        .letter-content { font-size: 1.05rem; color: #34495e; white-space: pre-line; line-height: 1.7; font-style: italic; margin-bottom: 25px; }
+        .heart-btn {
+            position: absolute; bottom: 15px; right: 20px;
+            background: #f1f2f6; border: none; padding: 6px 15px;
+            border-radius: 20px; cursor: pointer; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 5px; color: #636e72;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .heart-btn:hover { background: #ffeaa7; }
+        .heart-btn.liked { background: #ff7675; color: white; }
+        .heart-btn.liked .heart-icon { animation: heartBeat 0.5s; }
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        footer { text-align: center; padding: 30px; color: #95a5a6; font-size: 0.9rem; background-color: #fff; margin-top: 80px; }
+        /* --- CSS HỘP THOẠI MODAL ĐA NĂNG --- */
+        #member-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        #member-modal.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: var(--card-bg); padding: 40px; border-radius: 20px;
+            text-align: center; max-width: 400px; width: 90%; position: relative;
+            transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        #member-modal.active .modal-content { transform: scale(1); }
+        .modal-content img {
+            width: 180px; height: 180px; border-radius: 50%; object-fit: cover;
+            border: 5px solid rgb(0, 0, 0); margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .modal-content h3 { color: rgb(66, 66, 65); font-size: 1.8rem; margin-bottom: 10px; }
+        .modal-content p { color: #636e72; font-size: 1.1rem; }
+        .close-modal-btn {
+            position: absolute; top: 15px; right: 15px; background: #f1f2f6; border: none;
+            width: 35px; height: 35px; border-radius: 50%; font-size: 20px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; z-index: 10;
+        }
+        .close-modal-btn:hover { background: var(--accent-color); color: white; }
+        #member-modal.photo-mode .modal-content {
+            max-width: 800px; width: 95%; padding: 15px; background: transparent; box-shadow: none;
+        }
+        #member-modal.photo-mode .modal-content img {
+            width: 100%; height: auto; max-height: 80vh;
+            border-radius: 8px; border: none; margin-bottom: 0; object-fit: contain;
+        }
+        #member-modal.photo-mode .modal-content h3,
+        #member-modal.photo-mode .modal-content p { display: none; }
+        #member-modal.photo-mode .close-modal-btn { top: -20px; right: 0; background: rgba(255,255,255,0.3); color: white; }
+        @media (max-width: 768px) {
+            .teacher-highlight { flex-direction: column; text-align: center; padding: 20px; }
+            nav a { padding: 12px 15px; font-size: 0.9rem; }
+            .music-player-widget { left: 50%; transform: translateX(-50%); width: calc(100% - 40px); bottom: 15px; }
+        }
+    </style>
 </head>
 <body>
-<div id="effect-container"></div>
+    <div id="effect-container"></div>
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2>Xác Minh Thành Viên của Lớp 9/5</h2>
+            <p>Để bảo mật quyền riêng tư cho lớp, vui lòng trả lời câu hỏi bên dưới nha hihi:></p>
+            <p><strong>Lớp 9/5 có biệt danh là gì?????</strong></p>
+            <div class="quiz-options">
+                <button class="option-btn" onclick="checkAnswer(false)">A. 9/5 top 1 khối 9</button>
+                <button class="option-btn" onclick="checkAnswer(false)">B. 9/5 đáng iu</button>
+                <button class="option-btn" onclick="checkAnswer(false)">C. 9/5 </button>
+                <button class="option-btn" onclick="checkAnswer(true)">D. 9/5 iu thương</button>
+            </div>
+        </div>
+    </div>
 
-<div id="auth-screen">
-<div class="auth-card">
-<h2>Xác Minh Thành Viên của Lớp 9/5</h2>
-<p>Để bảo mật quyền riêng tư cho lớp, vui lòng trả lời câu hỏi bên dưới nha hihi:></p>
-<p><strong>Lớp 9/5 có biệt danh là gì?????</strong></p>
-<div class="quiz-options">
-<button class="option-btn" onclick="checkAnswer(false)">A. 9/5 top 1 khối 9</button>
-<button class="option-btn" onclick="checkAnswer(false)">B. 9/5 đáng iu</button>
-<button class="option-btn" onclick="checkAnswer(false)">C. 9/5 </button>
-<button class="option-btn" onclick="checkAnswer(true)">D. 9/5 iu thương</button>
-</div>
-</div>
-</div>
+    <div id="main-content" class="hidden">
+        <div class="music-player-widget">
+            <div class="cd-disk" id="cd-disk"></div>
+            <div class="player-controls">
+                <div class="song-title"> 🎵 Có Hẹn Với Thanh Xuân</div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="play-toggle-btn" id="play-btn" onclick="toggleMusic()"> ▶ Phát nhạc</button>
+                    <button class="play-toggle-btn" id="effect-btn" onclick="toggleEffect()" style="background: #e84393;"> ✨ Tắt hiệu ứng</button>
+                </div>
+            </div>
+            <audio id="bg-music" loop src="cohenvoithanhxuan.mp3"></audio>
+        </div>
 
-<div id="main-content" class="hidden">
-<div class="music-player-widget">
-<div class="cd-disk" id="cd-disk"></div>
-<div class="player-controls">
-<div class="song-title">  🎵  Có Hẹn Với Thanh Xuân</div>
-<div style="display: flex; gap: 8px; flex-wrap: wrap;">
-    <button class="play-toggle-btn" id="play-btn" onclick="toggleMusic()">  ▶  Phát nhạc</button>
-    <button class="play-toggle-btn" id="effect-btn" onclick="toggleEffect()" style="background: #e84393;"> ✨ Tắt hiệu ứng</button>
-</div>
-</div>
-<audio id="bg-music" loop src="cohenvoithanhxuan.mp3"></audio>
-</div>
+        <header id="main-header" title="Nhấn vào để phóng to ảnh bìa">
+            <h1>Nơi Lưu Giữ Kỷ Niệm 9/5 (2025-2026)</h1>
+            <p>"Thanh xuân giống như một cơn mưa rào, dù cho bạn từng bị cảm lạnh vì dầm mưa, bạn vẫn muốn được đắm mình trong cơn mưa ấy thêm một lần nữa."</p>
+        </header>
 
-<header id="main-header" title="Nhấn vào để phóng to ảnh bìa">
-<h1>Nơi Lưu Giữ Kỷ Niệm 9/5 (2025-2026)</h1>
-<p>"Thanh xuân giống như một cơn mưa rào, dù cho bạn từng bị cảm lạnh vì dầm mưa, bạn vẫn muốn được đắm mình trong cơn mưa ấy thêm một lần nữa."</p>
-</header>
+        <nav>
+            <a href="#photos">Hình Ảnh</a>
+            <a href="#videos">Video Kỷ Niệm</a>
+            <a href="#members">Thành Viên</a>
+            <a href="#letter">Thư Gửi Lớp</a>
+        </nav>
 
-<nav>
-<a href="#photos">Hình Ảnh</a>
-<a href="#videos">Video Kỷ Niệm</a>
-<a href="#members">Thành Viên</a>
-<a href="#letter">Thư Gửi Lớp</a>
-</nav>
+        <div class="container">
+            <section id="photos">
+                <h2>Hình Ảnh Lớp</h2>
+                <p style="margin-bottom: 20px; color: #636e72; font-style: italic;">* Nhấn vào ảnh bất kỳ để phóng to xem rõ nét</p>
+                <div class="photo-grid">
+                    <div class="photo-item"><img src="a1.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a2.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a3.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a4.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a5.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a6.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a7.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a8.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a9.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a10.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a11.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a12.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a13.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a14.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a15.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a16.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a17.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a18.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a19.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a20.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a21.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a22.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a23.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a24.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a25.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a26.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a27.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a28.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a29.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a30.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a31.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a32.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a33.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a34.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a35.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a36.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a37.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a38.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a39.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a40.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a41.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a42.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a43.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a44.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a45.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a46.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a47.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a48.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a49.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a50.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a51.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a52.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a53.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a54.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a55.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="a56.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="al1.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="al2.jpg" alt="Ảnh kỷ yếu"></div>
+                    <div class="photo-item"><img src="thu'.jpg" alt="Ảnh kỷ yếu"></div>
+                </div>
+            </section>
 
-<div class="container">
-<section id="photos">
-<h2>Hình Ảnh Lớp</h2>
-<p style="margin-bottom: 20px; color: #636e72; font-style: italic;">* Nhấn vào ảnh bất kỳ để phóng to xem rõ nét</p>
-<div class="photo-grid">
-<div class="photo-item"><img src="a1.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a2.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a3.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a4.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a5.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a6.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a7.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a8.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a9.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a10.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a11.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a12.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a13.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a14.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a15.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a16.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a17.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a18.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a19.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a20.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a21.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a22.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a23.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a24.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a25.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a26.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a27.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a28.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a29.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a30.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a31.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a32.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a33.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a34.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a35.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a36.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a37.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a38.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a39.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a40.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a41.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a42.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a43.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a44.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a45.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a46.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a47.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a48.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a49.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a50.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a51.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a52.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a53.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a54.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a55.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="a56.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="al1.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="al2.jpg" alt="Ảnh kỷ yếu"></div>
-<div class="photo-item"><img src="thu'.jpg" alt="Ảnh kỷ yếu"></div>
+            <section id="videos">
+                <h2>Video Kỷ Niệm</h2>
+                <div class="video-grid">
+                    <div class="video-item"><video controls preload="none"><source src="vid1.mp4" type="video/mp4"></video><div class="video-info">Video 1</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid2.mp4" type="video/mp4"></video><div class="video-info">Video 2</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid3.mp4" type="video/mp4"></video><div class="video-info">Video 3</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid4.mp4" type="video/mp4"></video><div class="video-info">Video 4</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid5.mp4" type="video/mp4"></video><div class="video-info">Video 5</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid6.mp4" type="video/mp4"></video><div class="video-info">Video 6</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid7.mp4" type="video/mp4"></video><div class="video-info">Video 7</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid8.mp4" type="video/mp4"></video><div class="video-info">Video 8</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid9.mp4" type="video/mp4"></video><div class="video-info">Video 9</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid10.mp4" type="video/mp4"></video><div class="video-info">Video 10</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid11.mp4" type="video/mp4"></video><div class="video-info">Video 11</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid12.mp4" type="video/mp4"></video><div class="video-info">Video 12</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid13.mp4" type="video/mp4"></video><div class="video-info">Video 13</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid14.mp4" type="video/mp4"></video><div class="video-info">Video 14</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid15.mp4" type="video/mp4"></video><div class="video-info">Video 15</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid16.mp4" type="video/mp4"></video><div class="video-info">Video 16</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid17.mp4" type="video/mp4"></video><div class="video-info">Video 17</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid18.mp4" type="video/mp4"></video><div class="video-info">Video 18</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid19.mp4" type="video/mp4"></video><div class="video-info">Video 19</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid20.mp4" type="video/mp4"></video><div class="video-info">Video 20</div></div>
+                    <div class="video-item"><video controls preload="none"><source src="vid21.mp4" type="video/mp4"></video><div class="video-info">Video 21</div></div>
+                </div>
+            </section>
 
-</div>
-</section>
+            <section id="members">
+                <h2>Thành Viên Lớp</h2>
+                <p style="margin-bottom: 20px; color: #636e72; font-style: italic;">* Nhấn vào từng thành viên để xem chi tiết</p>
+                <div class="member-grid">
+                    <div class="member-card teacher-highlight">
+                        <img src="co.jpg" alt="Giáo viên chủ nhiệm">
+                        <div class="teacher-info">
+                            <h3>Cô Trương Thanh Thuỷ</h3>
+                            <p>Giáo viên chủ nhiệm</p>
+                        </div>
+                    </div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Ngọc Quỳnh Anh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Hoàng Gia Bảo</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Lê Gia Bảo</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Hà Thanh Duy</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Trần Phương Duy</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Huỳnh Tấn Đại</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lâm Gia Hân</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Phúc Hậu</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lê Văn Huấn</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Trần Việt Hùng</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Minh Khang</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Hồ Đăng Khoa</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Tống Lê Phương Khoa</div><div class="role">Tổ trưởng tổ 1</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Trần Anh Khôi</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lê Nguyễn Trúc Linh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lê Tấn Lộc</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Anh Minh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Hải Minh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lê Thị Diễm My</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Trương Hoàng Nam</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Bùi Ngọc Khánh Ngân</div><div class="role">Tổ trưởng tổ 4</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Võ Thị Tuyết Ngân</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Phạm Thị Thanh Ngọc</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Thị Tâm Như</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Phan Thành Phát</div><div class="role">Tổ trưởng tổ 2</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Phan Hoàng Phúc</div><div class="role">Lớp phó học tập</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Bùi Nguyễn Như Quỳnh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Võ Đông Quỳnh</div><div class="role">Tổ trưởng tổ 3</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Hà Mạnh Thêm</div><div class="role">Lớp trưởng</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Phước Thịnh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Quốc Thịnh</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lại Thị Anh Thơ</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Phan Lâm Nhã Thy</div><div class="role">Lớp phó VTM</div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Huỳnh Lưu Ngọc Trang</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Trần Lê Bích Trâm</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Biện Thị Mỹ Uyên</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Lưu Thanh Vy</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Trịnh Yến Vy</div><div class="role"></div></div>
+                    <div class="member-card"><img src="av.webp" alt="Học sinh"><div class="name">Nguyễn Thị Nhã Yến</div><div class="role"></div></div>
+                </div>
+            </section>
 
-<section id="videos">
-<h2>Video Kỷ Niệm</h2>
-<div class="video-grid">
-<div class="video-item">
-<video controls><source src="vid1.mp4" type="video/mp4"></video>
-<div class="video-info">Video 1</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid2.mp4" type="video/mp4"></video>
-<div class="video-info">Video 2</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid3.mp4" type="video/mp4"></video>
-<div class="video-info">Video 3</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid4.mp4" type="video/mp4"></video>
-<div class="video-info">Video 4</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid5.mp4" type="video/mp4"></video>
-<div class="video-info">Video 5</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid6.mp4" type="video/mp4"></video>
-<div class="video-info">Video 6</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid7.mp4" type="video/mp4"></video>
-<div class="video-info">Video 7</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid8.mp4" type="video/mp4"></video>
-<div class="video-info">Video 8</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid9.mp4" type="video/mp4"></video>
-<div class="video-info">Video 9</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid10.mp4" type="video/mp4"></video>
-<div class="video-info">Video 10</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid11.mp4" type="video/mp4"></video>
-<div class="video-info">Video 11</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid12.mp4" type="video/mp4"></video>
-<div class="video-info">Video 12</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid13.mp4" type="video/mp4"></video>
-<div class="video-info">Video 13</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid14.mp4" type="video/mp4"></video>
-<div class="video-info">Video 14</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid15.mp4" type="video/mp4"></video>
-<div class="video-info">Video 15</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid16.mp4" type="video/mp4"></video>
-<div class="video-info">Video 16</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid17.mp4" type="video/mp4"></video>
-<div class="video-info">Video 17</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid18.mp4" type="video/mp4"></video>
-<div class="video-info">Video 18</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid19.mp4" type="video/mp4"></video>
-<div class="video-info">Video 19</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid20.mp4" type="video/mp4"></video>
-<div class="video-info">Video 20</div>
-</div>
-<div class="video-item">
-<video controls><source src="vid21.mp4" type="video/mp4"></video>
-<div class="video-info">Video 21</div>
-</div>
+            <section id="letter">
+                <h2>Góc Nhắn Gửi Yêu Thương</h2>
+                <div class="letter-section">
+                    <div class="write-letter-box">
+                        <input type="text" id="sender-name" placeholder="Tên của bạn là gì nhỉ? 😊 ">
+                        <textarea id="sender-message" rows="4" placeholder="Viết vài lời nhắn gửi đến lớp nhé..."></textarea>
+                        <button class="submit-btn" onclick="sendLetter()">Gửi Tâm Thư 💌 </button>
+                    </div>
+                    <div id="message-board">
+                    </div>
+                </div>
+            </section>
+        </div>
 
-</div>
-</section>
+        <footer>
+            <p>Nơi lưu giữ những kỷ niệm đẹp nhất của lớp 9/5 (2025-2026)</p>
+        </footer>
+    </div>
 
-<section id="members">
-<h2>Thành Viên Lớp</h2>
-<p style="margin-bottom: 20px; color: #636e72; font-style: italic;">* Nhấn vào từng thành viên để xem chi tiết</p>
-<div class="member-grid">
-<div class="member-card teacher-highlight">
-<img src="co.jpg" alt="Giáo viên chủ nhiệm">
-<div class="teacher-info">
-<h3>Cô Trương Thanh Thuỷ</h3>
-<p>Giáo viên chủ nhiệm</p>
-</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Ngọc Quỳnh Anh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Hoàng Gia Bảo</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Lê Gia Bảo</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Hà Thanh Duy</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Trần Phương Duy</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Huỳnh Tấn Đại</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lâm Gia Hân</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Phúc Hậu</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lê Văn Huấn</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Trần Việt Hùng</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Minh Khang</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Hồ Đăng Khoa</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Tống Lê Phương Khoa</div>
-<div class="role">Tổ trưởng tổ 1</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Trần Anh Khôi</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lê Nguyễn Trúc Linh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lê Tấn Lộc</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Anh Minh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Hải Minh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lê Thị Diễm My</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Trương Hoàng Nam</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Bùi Ngọc Khánh Ngân</div>
-<div class="role">Tổ trưởng tổ 4</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Võ Thị Tuyết Ngân</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Phạm Thị Thanh Ngọc</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Thị Tâm Như</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Phan Thành Phát</div>
-<div class="role">Tổ trưởng tổ 2</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Phan Hoàng Phúc</div>
-<div class="role">Lớp phó học tập</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Bùi Nguyễn Như Quỳnh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Võ Đông Quỳnh</div>
-<div class="role">Tổ trưởng tổ 3</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Hà Mạnh Thêm</div>
-<div class="role">Lớp trưởng</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Phước Thịnh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Quốc Thịnh</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lại Thị Anh Thơ</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Phan Lâm Nhã Thy</div>
-<div class="role">Lớp phó VTM</div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Huỳnh Lưu Ngọc Trang</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Trần Lê Bích Trâm</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Biện Thị Mỹ Uyên</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Lưu Thanh Vy</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Trịnh Yến Vy</div>
-<div class="role"></div>
-</div>
-<div class="member-card">
-<img src="av.webp" alt="Học sinh">
-<div class="name">Nguyễn Thị Nhã Yến</div>
-<div class="role"></div>
-</div>
-</div>
-</section>
+    <div id="member-modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-modal-btn" onclick="closeModal(event)">×</button>
+            <img id="modal-img" src="" alt="Hình ảnh">
+            <h3 id="modal-name">Tên</h3>
+            <p id="modal-role">Thông tin</p>
+        </div>
+    </div>
 
-<section id="letter">
-<h2>Góc Nhắn Gửi Yêu Thương</h2>
-<div class="letter-section">
-<div class="write-letter-box">
-<input type="text" id="sender-name" placeholder="Tên của bạn là gì nhỉ?  😊  ">
-<textarea id="sender-message" rows="4" placeholder="Viết vài lời nhắn gửi đến lớp nhé..."></textarea>
-<button class="submit-btn" onclick="sendLetter()">Gửi Tâm Thư  💌  </button>
-</div>
-<div id="message-board">
-</div>
-</div>
-</section>
-</div>
+    <script>
+        // MẬT KHẨU ADMIN (Bạn có thể đổi ở đây)
+        const ADMIN_PASSWORD = "15082011";
+        // TẠO MÃ ĐỊNH DANH (ID) CHO NGƯỜI DÙNG HIỆN TẠI
+        let currentUserId = localStorage.getItem('myUserId_9A5');
+        if (!currentUserId) {
+            currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('myUserId_9A5', currentUserId);
+        }
 
-<footer>
-<p>Nơi lưu giữ những kỷ niệm đẹp nhất của lớp 9/5 (2025-2026)</p>
-</footer>
-</div>
+        // 1. Xác thực thành viên
+        function checkAnswer(isCorrect) {
+            if (isCorrect) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('main-content').classList.remove('hidden');
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                
+                // ĐÃ SỬA: Loại bỏ setTimeout để nhạc phát ngay khi trả lời đúng trên điện thoại
+                if (music.paused) { toggleMusic(); }
+            } else {
+                alert('Hic! Sai rồi nha. Nhớ lại xem nào! 😜 ');
+            }
+        }
 
-<div id="member-modal" onclick="closeModal(event)">
-<div class="modal-content" onclick="event.stopPropagation()">
-<button class="close-modal-btn" onclick="closeModal(event)">×</button>
-<img id="modal-img" src="" alt="Hình ảnh">
-<h3 id="modal-name">Tên</h3>
-<p id="modal-role">Thông tin</p>
-</div>
-</div>
+        // 2. Nhạc nền Fade-in
+        const music = document.getElementById('bg-music');
+        const playBtn = document.getElementById('play-btn');
+        const cdDisk = document.getElementById('cd-disk');
+        let fadeInterval;
+        function toggleMusic() {
+            if (music.paused) {
+                music.volume = 0;
+                music.play().then(() => {
+                    playBtn.innerText = ' ⏸ Tạm dừng';
+                    cdDisk.classList.add('playing');
+                    clearInterval(fadeInterval);
+                    fadeInterval = setInterval(() => {
+                        if (music.volume < 0.95) { music.volume += 0.05; }
+                        else { music.volume = 1.0; clearInterval(fadeInterval); }
+                    }, 150);
+                }).catch(error => { console.log("Cần tương tác thủ công."); });
+            } else {
+                music.pause();
+                playBtn.innerText = ' ▶ Phát nhạc';
+                cdDisk.classList.remove('playing');
+                clearInterval(fadeInterval);
+            }
+        }
 
-<script>
-// MẬT KHẨU ADMIN (Bạn có thể đổi ở đây)
-const ADMIN_PASSWORD = "15082011";
+        // 3. Xử lý sự kiện phóng to (Modal)
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('member-modal');
+            
+            // XỬ LÝ CLICK ẢNH BÌA ĐỂ PHÓNG TO
+            const mainHeader = document.getElementById('main-header');
+            if(mainHeader) {
+                mainHeader.addEventListener('click', function() {
+                    document.getElementById('modal-img').src = 'al1.jpg';
+                    modal.classList.add('photo-mode');
+                    modal.classList.add('active');
+                });
+            }
 
-// TẠO MÃ ĐỊNH DANH (ID) CHO NGƯỜI DÙNG HIỆN TẠI
-let currentUserId = localStorage.getItem('myUserId_9A5');
-if (!currentUserId) {
-currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
-localStorage.setItem('myUserId_9A5', currentUserId);
-}
+            const photoItems = document.querySelectorAll('.photo-item');
+            photoItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const imgSrc = this.querySelector('img').src;
+                    document.getElementById('modal-img').src = imgSrc;
+                    modal.classList.add('photo-mode');
+                    modal.classList.add('active');
+                });
+            });
 
-// 1. Xác thực thành viên
-function checkAnswer(isCorrect) {
-if (isCorrect) {
-document.getElementById('auth-screen').style.display = 'none';
-document.getElementById('main-content').classList.remove('hidden');
-window.scrollTo({top: 0, behavior: 'smooth'});
-setTimeout(() => {
-if (music.paused) { toggleMusic(); }
-}, 500);
-} else {
-alert('Hic! Sai rồi nha. Nhớ lại xem nào!  😜  ');
-}
-}
+            const memberCards = document.querySelectorAll('.member-card');
+            memberCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const imgSrc = this.querySelector('img').src;
+                    let nameStr = "";
+                    let roleStr = "";
+                    if (this.classList.contains('teacher-highlight')) {
+                        nameStr = this.querySelector('h3').innerText;
+                        roleStr = this.querySelector('p').innerText;
+                    } else {
+                        nameStr = this.querySelector('.name').innerText;
+                        roleStr = this.querySelector('.role').innerText;
+                    }
+                    document.getElementById('modal-img').src = imgSrc;
+                    document.getElementById('modal-name').innerText = nameStr;
+                    document.getElementById('modal-role').innerText = roleStr;
+                    modal.classList.remove('photo-mode');
+                    modal.classList.add('active');
+                });
+            });
+        });
 
-// 2. Nhạc nền Fade-in
-const music = document.getElementById('bg-music');
-const playBtn = document.getElementById('play-btn');
-const cdDisk = document.getElementById('cd-disk');
-let fadeInterval;
+        function closeModal(event) {
+            if (!event || event.target.id === 'member-modal' || event.target.classList.contains('close-modal-btn')) {
+                const modal = document.getElementById('member-modal');
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.classList.remove('photo-mode');
+                }, 300);
+            }
+        }
 
-function toggleMusic() {
-if (music.paused) {
-music.volume = 0;
-music.play().then(() => {
-playBtn.innerText = '  ⏸  Tạm dừng';
-cdDisk.classList.add('playing');
-clearInterval(fadeInterval);
-fadeInterval = setInterval(() => {
-if (music.volume < 0.95) { music.volume += 0.05; }
-else { music.volume = 1.0; clearInterval(fadeInterval); }
-}, 150);
-}).catch(error => { console.log("Cần tương tác thủ công."); });
-} else {
-music.pause();
-playBtn.innerText = '  ▶  Phát nhạc';
-cdDisk.classList.remove('playing');
-clearInterval(fadeInterval);
-}
-}
+        // 4. Xử lý Góc Nhắn Gửi & Thả Tim & Xoá/Sửa Thư
+        const defaultLetters = [
+            {
+                id: 1,
+                name: "Một thành viên 9/5",
+                content: "Gửi tập thể lớp thân thương của chúng ta,\n\nNhững năm tháng cùng học, cùng chơi, cùng nỗ lực dưới một mái trường là quãng thời gian đẹp đẽ nhất mà thanh xuân mang lại. Trang web này được dựng lên như một chiếc hộp thời gian, cất giữ trọn vẹn từng nụ cười, giọt nước mắt và cả những lời chúc tốt đẹp nhất dành cho nhau.\n\nDù mai này bước vào lớp 10, mỗi người có thể sẽ học ở một ngôi trường khác nhau, bước đi trên những hành trình mới, nhưng mong rằng khi nhìn lại những thước phim, những hình ảnh tại đây, chúng ta đều nhớ rằng mình đã từng có một tập thể tuyệt vời đến thế. Tập thể lớp cũng chính là một gia đình thứ hai mà chúng ta luôn trân trọng.",
+                hearts: 0,
+                isLiked: false,
+                authorId: 'system_admin'
+            }
+        ];
 
-// 3. Xử lý sự kiện phóng to (Modal)
-document.addEventListener('DOMContentLoaded', () => {
-const modal = document.getElementById('member-modal');
+        let classLetters = JSON.parse(localStorage.getItem('myClassLetters9A5')) || defaultLetters;
 
-// XỬ LÝ CLICK ẢNH BÌA ĐỂ PHÓNG TO
-const mainHeader = document.getElementById('main-header');
-if(mainHeader) {
-mainHeader.addEventListener('click', function() {
-// Truyền đường dẫn ảnh bìa trực tiếp vào đây
-document.getElementById('modal-img').src = 'al1.jpg';
-modal.classList.add('photo-mode');
-modal.classList.add('active');
-});
-}
-const photoItems = document.querySelectorAll('.photo-item');
-photoItems.forEach(item => {
-item.addEventListener('click', function() {
-const imgSrc = this.querySelector('img').src;
-document.getElementById('modal-img').src = imgSrc;
-modal.classList.add('photo-mode');
-modal.classList.add('active');
-});
-});
+        function renderLetters() {
+            const board = document.getElementById('message-board');
+            board.innerHTML = '';
+            classLetters.forEach((letter, index) => {
+                const heartClass = letter.isLiked ? 'liked' : '';
+                const heartSymbol = letter.isLiked ? ' ❤️ ' : ' 🤍 ';
+                const isAuthor = (letter.authorId === currentUserId);
+                
+                // Nút sửa chỉ hiện khi người đó là tác giả bức thư
+                const editButton = isAuthor
+                    ? `<button class="edit-btn" onclick="editLetter(${letter.id})"> ✏️ Sửa</button>`
+                    : ``;
+                
+                // Nút xoá hiện cho tất cả, logic mật khẩu sẽ được xử lý trong hàm deleteLetter
+                const deleteButton = `<button class="delete-btn" onclick="deleteLetter(${letter.id})"> 🗑️ Xoá</button>`;
+                
+                const showActions = `
+                    <div class="action-buttons">
+                        ${editButton}
+                        ${deleteButton}
+                    </div>
+                `;
+                const letterHTML = `
+                    <div class="letter-card">
+                        <div class="letter-header">
+                            <h4>${letter.name}</h4>
+                            ${showActions}
+                        </div>
+                        <div class="letter-content">${letter.content}</div>
+                        <button class="heart-btn ${heartClass}" onclick="toggleHeart(${index})">
+                            <span class="heart-icon">${heartSymbol}</span> ${letter.hearts}
+                        </button>
+                    </div>
+                `;
+                board.innerHTML += letterHTML;
+            });
+        }
 
-const memberCards = document.querySelectorAll('.member-card');
-memberCards.forEach(card => {
-card.addEventListener('click', function() {
-const imgSrc = this.querySelector('img').src;
-let nameStr = "";
-let roleStr = "";
-if (this.classList.contains('teacher-highlight')) {
-nameStr = this.querySelector('h3').innerText;
-roleStr = this.querySelector('p').innerText;
-} else {
-nameStr = this.querySelector('.name').innerText;
-roleStr = this.querySelector('.role').innerText;
-}
-document.getElementById('modal-img').src = imgSrc;
-document.getElementById('modal-name').innerText = nameStr;
-document.getElementById('modal-role').innerText = roleStr;
-modal.classList.remove('photo-mode');
-modal.classList.add('active');
-});
-});
-});
+        // HÀM XOÁ THƯ CÓ PHÂN QUYỀN
+        function deleteLetter(letterId) {
+            const letterToDelete = classLetters.find(letter => letter.id === letterId);
+            if (!letterToDelete) return;
+            
+            // Kiểm tra: Nếu là tác giả bức thư thì cho xoá luôn
+            if (letterToDelete.authorId === currentUserId) {
+                if(confirm("Bạn có chắc chắn muốn xoá bức thư của mình không?")) {
+                    executeDelete(letterId);
+                }
+            } else {
+                // Nếu không phải tác giả thì yêu cầu nhập mật khẩu admin
+                const pass = prompt("Bạn không phải người viết thư này. Vui lòng nhập mật khẩu Admin để xoá:");
+                if (pass === null) {
+                    return; // Người dùng ấn nút Hủy (Cancel)
+                }
+                if (pass === ADMIN_PASSWORD) {
+                    executeDelete(letterId);
+                } else {
+                    alert("Sai mật khẩu Admin! Bạn không có quyền xoá thư này.");
+                }
+            }
+        }
 
-function closeModal(event) {
-if (!event || event.target.id === 'member-modal' || event.target.classList.contains('close-modal-btn')) {
-const modal = document.getElementById('member-modal');
-modal.classList.remove('active');
-setTimeout(() => {
-modal.classList.remove('photo-mode');
-}, 300);
-}
-}
+        // Thực thi lệnh xoá
+        function executeDelete(letterId) {
+            classLetters = classLetters.filter(letter => letter.id !== letterId);
+            localStorage.setItem('myClassLetters9A5', JSON.stringify(classLetters));
+            renderLetters();
+        }
 
-// 4. Xử lý Góc Nhắn Gửi & Thả Tim & Xoá/Sửa Thư
-const defaultLetters = [
-{
-id: 1,
-name: "Một thành viên 9/5",
-content: "Gửi tập thể lớp thân thương của chúng ta,\n\nNhững năm tháng cùng học, cùng chơi, cùng nỗ lực dưới một mái trường là quãng thời gian đẹp đẽ nhất mà thanh xuân mang lại. Trang web này được dựng lên như một chiếc hộp thời gian, cất giữ trọn vẹn từng nụ cười, giọt nước mắt và cả những lời chúc tốt đẹp nhất dành cho nhau.\n\nDù mai này bước vào lớp 10, mỗi người có thể sẽ học ở một ngôi trường khác nhau, bước đi trên những hành trình mới, nhưng mong rằng khi nhìn lại những thước phim, những hình ảnh tại đây, chúng ta đều nhớ rằng mình đã từng có một tập thể tuyệt vời đến thế. Tập thể lớp cũng chính là một gia đình thứ hai mà chúng ta luôn trân trọng.",
-hearts: 0,
-isLiked: false,
-authorId: 'system_admin'
-}
-];
+        // Biến lưu trữ ID của bức thư đang được chỉnh sửa
+        let editingId = null;
 
-let classLetters = JSON.parse(localStorage.getItem('myClassLetters9A5')) || defaultLetters;
+        function editLetter(letterId) {
+            const letterToEdit = classLetters.find(letter => letter.id === letterId);
+            if (!letterToEdit) return;
+            document.getElementById('sender-name').value = letterToEdit.name;
+            document.getElementById('sender-message').value = letterToEdit.content;
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerText = 'Cập nhật Tâm Thư ✍️ ';
+            submitBtn.style.background = '#0984e3';
+            editingId = letterId;
+            document.querySelector('.write-letter-box').scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
 
-function renderLetters() {
-const board = document.getElementById('message-board');
-board.innerHTML = '';
-classLetters.forEach((letter, index) => {
-const heartClass = letter.isLiked ? 'liked' : '';
-const heartSymbol = letter.isLiked ? '  ❤️  ' : '  🤍  ';
-const isAuthor = (letter.authorId === currentUserId);
+        function sendLetter() {
+            const nameInput = document.getElementById('sender-name');
+            const messageInput = document.getElementById('sender-message');
+            if (nameInput.value.trim() === '' || messageInput.value.trim() === '') {
+                alert('Bạn nhớ điền đủ tên và nội dung lời nhắn nhé! ✍️ ');
+                return;
+            }
+            if (editingId) {
+                const letterIndex = classLetters.findIndex(letter => letter.id === editingId);
+                if (letterIndex !== -1) {
+                    classLetters[letterIndex].name = nameInput.value;
+                    classLetters[letterIndex].content = messageInput.value;
+                }
+                editingId = null;
+                const submitBtn = document.querySelector('.submit-btn');
+                submitBtn.innerText = 'Gửi Tâm Thư 💌 ';
+                submitBtn.style.background = 'var(--accent-color)';
+            } else {
+                classLetters.unshift({
+                    id: Date.now(),
+                    name: nameInput.value,
+                    content: messageInput.value,
+                    hearts: 0,
+                    isLiked: false,
+                    authorId: currentUserId
+                });
+            }
+            localStorage.setItem('myClassLetters9A5', JSON.stringify(classLetters));
+            renderLetters();
+            nameInput.value = '';
+            messageInput.value = '';
+        }
 
-// Nút sửa chỉ hiện khi người đó là tác giả bức thư
-const editButton = isAuthor
-? `<button class="edit-btn" onclick="editLetter(${letter.id})">  ✏️  Sửa</button>`
-: ``;
+        function toggleHeart(index) {
+            if (classLetters[index].isLiked) {
+                classLetters[index].hearts--;
+                classLetters[index].isLiked = false;
+            } else {
+                classLetters[index].hearts++;
+                classLetters[index].isLiked = true;
+            }
+            localStorage.setItem('myClassLetters9A5', JSON.stringify(classLetters));
+            renderLetters();
+        }
 
-// Nút xoá hiện cho tất cả, logic mật khẩu sẽ được xử lý trong hàm deleteLetter
-const deleteButton = `<button class="delete-btn" onclick="deleteLetter(${letter.id})">  🗑️  Xoá</button>`;
-const showActions = `
-<div class="action-buttons">
-${editButton}
-${deleteButton}
-</div>
-`;
-const letterHTML = `
-<div class="letter-card">
-<div class="letter-header">
-<h4>${letter.name}</h4>
-${showActions}
-</div>
-<div class="letter-content">${letter.content}</div>
-<button class="heart-btn ${heartClass}" onclick="toggleHeart(${index})">
-<span class="heart-icon">${heartSymbol}</span> ${letter.hearts}
-</button>
-</div>
-`;
-board.innerHTML += letterHTML;
-});
-}
+        // 5. HIỆU ỨNG NGÔI SAO & TRÁI TIM RƠI
+        let effectInterval;
+        let isEffectRunning = true; // Mặc định tự động bật khi vào web
+        const particleIcons = [' ⭐ ', ' ❤️ ', ' 💖 ', ' ✨ ', ' 🌟 ', ' 💕 '];
+        
+        function createParticle() {
+            if (!isEffectRunning) return;
+            const container = document.getElementById('effect-container');
+            const particle = document.createElement('div');
+            particle.className = 'falling-item';
+            particle.innerText = particleIcons[Math.floor(Math.random() * particleIcons.length)];
+            
+            // Tạo kích thước, vị trí và thời gian rơi ngẫu nhiên
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.fontSize = (Math.random() * 15 + 10) + 'px'; // Kích thước từ 10px đến 25px
+            particle.style.animationDuration = (Math.random() * 4 + 3) + 's'; // Tốc độ rơi từ 3s đến 7s
+            
+            container.appendChild(particle);
+            
+            // Dọn dẹp thẻ div sau khi icon rơi hết xuống đáy để không làm nặng web
+            setTimeout(() => {
+                particle.remove();
+            }, 7000);
+        }
 
-// HÀM XOÁ THƯ CÓ PHÂN QUYỀN
-function deleteLetter(letterId) {
-const letterToDelete = classLetters.find(letter => letter.id === letterId);
-if (!letterToDelete) return;
+        function toggleEffect() {
+            isEffectRunning = !isEffectRunning;
+            const btn = document.getElementById('effect-btn');
+            const container = document.getElementById('effect-container');
+            if (isEffectRunning) {
+                btn.innerText = ' ✨ Tắt hiệu ứng';
+                btn.style.background = '#e84393'; // Màu gốc
+                effectInterval = setInterval(createParticle, 400); // 0.4s tạo 1 icon
+            } else {
+                btn.innerText = ' ✨ Bật hiệu ứng';
+                btn.style.background = '#636e72'; // Đổi màu xám khi tắt
+                clearInterval(effectInterval);
+                container.innerHTML = ''; // Xóa sạch các icon đang rớt trên màn hình
+            }
+        }
 
-// Kiểm tra: Nếu là tác giả bức thư thì cho xoá luôn
-if (letterToDelete.authorId === currentUserId) {
-if(confirm("Bạn có chắc chắn muốn xoá bức thư của mình không?")) {
-executeDelete(letterId);
-}
-} else {
-// Nếu không phải tác giả thì yêu cầu nhập mật khẩu admin
-const pass = prompt("Bạn không phải người viết thư này. Vui lòng nhập mật khẩu Admin để xoá:");
-if (pass === null) {
-return; // Người dùng ấn nút Hủy (Cancel)
-}
-if (pass === ADMIN_PASSWORD) {
-executeDelete(letterId);
-} else {
-alert("Sai mật khẩu Admin! Bạn không có quyền xoá thư này.");
-}
-}
-}
-
-// Thực thi lệnh xoá
-function executeDelete(letterId) {
-classLetters = classLetters.filter(letter => letter.id !== letterId);
-localStorage.setItem('myClassLetters9A5', JSON.stringify(classLetters));
-renderLetters();
-}
-
-// Biến lưu trữ ID của bức thư đang được chỉnh sửa
-let editingId = null;
-
-function editLetter(letterId) {
-const letterToEdit = classLetters.find(letter => letter.id === letterId);
-if (!letterToEdit) return;
-document.getElementById('sender-name').value = letterToEdit.name;
-document.getElementById('sender-message').value = letterToEdit.content;
-const submitBtn = document.querySelector('.submit-btn');
-submitBtn.innerText = 'Cập nhật Tâm Thư  ✍️  ';
-submitBtn.style.background = '#0984e3';
-editingId = letterId;
-document.querySelector('.write-letter-box').scrollIntoView({behavior: 'smooth', block: 'center'});
-}
-
-function sendLetter() {
-const nameInput = document.getElementById('sender-name');
-const messageInput = document.getElementById('sender-message');
-if (nameInput.value.trim() === '' || messageInput.value.trim() === '') {
-alert('Bạn nhớ điền đủ tên và nội dung lời nhắn nhé!  ✍️  ');
-return;
-}
-if (editingId) {
-const letterIndex = classLetters.findIndex(letter => letter.id === editingId);
-if (letterIndex !== -1) {
-classLetters[letterIndex].name = nameInput.value;
-classLetters[letterIndex].content = messageInput.value;
-}
-editingId = null;
-const submitBtn = document.querySelector('.submit-btn');
-submitBtn.innerText = 'Gửi Tâm Thư  💌  ';
-submitBtn.style.background = 'var(--accent-color)';
-} else {
-classLetters.unshift({
-id: Date.now(),
-name: nameInput.value,
-content: messageInput.value,
-hearts: 0,
-isLiked: false,
-authorId: currentUserId
-});
-}
-localStorage.setItem('myClassLetters9A5', JSON.stringify(classLetters));
-renderLetters();
-nameInput.value = '';
-messageInput.value = '';
-}
-
-function toggleHeart(index) {
-if (classLetters[index].isLiked) {
-classLetters[index].hearts--;
-classLetters[index].isLiked = false;
-} else {
-classLetters[index].hearts++;
-classLetters[index].isLiked = true;
-}
-localStorage.setItem('myClassLetters9A5', JSON.stringify(classLetters));
-renderLetters();
-}
-
-// 5. HIỆU ỨNG NGÔI SAO & TRÁI TIM RƠI
-let effectInterval;
-let isEffectRunning = true; // Mặc định tự động bật khi vào web
-const particleIcons = ['⭐', '❤️', '💖', '✨', '🌟', '💕'];
-
-function createParticle() {
-    if (!isEffectRunning) return;
-    const container = document.getElementById('effect-container');
-    const particle = document.createElement('div');
-    particle.className = 'falling-item';
-    particle.innerText = particleIcons[Math.floor(Math.random() * particleIcons.length)];
-
-    // Tạo kích thước, vị trí và thời gian rơi ngẫu nhiên
-    particle.style.left = Math.random() * 100 + 'vw';
-    particle.style.fontSize = (Math.random() * 15 + 10) + 'px'; // Kích thước từ 10px đến 25px
-    particle.style.animationDuration = (Math.random() * 4 + 3) + 's'; // Tốc độ rơi từ 3s đến 7s
-    
-    container.appendChild(particle);
-
-    // Dọn dẹp thẻ div sau khi icon rơi hết xuống đáy để không làm nặng web
-    setTimeout(() => {
-        particle.remove();
-    }, 7000); 
-}
-
-function toggleEffect() {
-    isEffectRunning = !isEffectRunning;
-    const btn = document.getElementById('effect-btn');
-    const container = document.getElementById('effect-container');
-    
-    if (isEffectRunning) {
-        btn.innerText = ' ✨ Tắt hiệu ứng';
-        btn.style.background = '#e84393'; // Màu gốc
-        effectInterval = setInterval(createParticle, 400); // 0.4s tạo 1 icon
-    } else {
-        btn.innerText = ' ✨ Bật hiệu ứng';
-        btn.style.background = '#636e72'; // Đổi màu xám khi tắt
-        clearInterval(effectInterval);
-        container.innerHTML = ''; // Xóa sạch các icon đang rớt trên màn hình
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderLetters();
-    // Bắt đầu hiệu ứng rơi tự động
-    effectInterval = setInterval(createParticle, 400);
-});
-</script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLetters();
+            // Bắt đầu hiệu ứng rơi tự động
+            effectInterval = setInterval(createParticle, 400);
+        });
+    </script>
 </body>
 </html>
